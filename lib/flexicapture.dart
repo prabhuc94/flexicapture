@@ -22,6 +22,7 @@ class Flexicapture {
   Duration? _randomDuration;
   bool _isStartTimer = false;
   bool _enableCompress = true;
+  bool _pauseCapture = false;
 
   /// Start the TIMER once [maxSize] [maxMinute] value added properly.
   void start() {
@@ -38,8 +39,11 @@ class Flexicapture {
     if (_isActiveRandomDuration) {
       await Future.delayed(randomDuration!);
       _setRandomValue((_randomDuration?.inMinutes ?? 0));
-      // CAPTURING
-      _setValue(await ScreenshotHelper.captureScreenShot(maxBytes: maxSize, compress: enableCompress));
+      if (_pauseCapture == false) {
+        // CAPTURING
+        _setValue(await ScreenshotHelper.captureScreenShot(
+            maxBytes: maxSize, compress: enableCompress));
+      }
     }
   }
 
@@ -94,6 +98,11 @@ class Flexicapture {
 
 
   int get maxSize => _maxSize;
+
+
+  set pauseCapture(bool value) {
+    _pauseCapture = value;
+  }
 
   void dispose() {
     _screenShotController.close();
