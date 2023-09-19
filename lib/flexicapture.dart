@@ -21,6 +21,7 @@ class Flexicapture {
   int _maxSize = 400 * 1024;
   Duration? _randomDuration;
   bool _isStartTimer = false;
+  bool _enableCompress = true;
 
   /// Start the TIMER once [maxSize] [maxMinute] value added properly.
   void start() {
@@ -38,7 +39,7 @@ class Flexicapture {
       await Future.delayed(randomDuration!);
       _setRandomValue((_randomDuration?.inMinutes ?? 0));
       // CAPTURING
-      _setValue(await ScreenshotHelper.captureScreenShot(maxBytes: maxSize));
+      _setValue(await ScreenshotHelper.captureScreenShot(maxBytes: maxSize, compress: enableCompress));
     }
   }
 
@@ -66,6 +67,13 @@ class Flexicapture {
       _randomMinController = StreamController.broadcast(sync: true);
     }
     _randomMinController.sink.add(value);
+  }
+
+
+  bool get enableCompress => _enableCompress;
+
+  set enableCompress(bool value) {
+    _enableCompress = value;
   }
 
   void _setValue(Uint8List? value) {

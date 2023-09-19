@@ -10,14 +10,15 @@ import 'package:screen_capturer/screen_capturer.dart';
 class ScreenshotHelper {
   ScreenshotHelper._();
 
-  static Future<Uint8List?> captureScreenShot({int maxBytes = 400 * 1024}) async {
+  static Future<Uint8List?> captureScreenShot({int maxBytes = 400 * 1024, bool compress = true}) async {
     Directory directory = await getTemporaryDirectory();
     String imageName = 'Screenshot-${DateTime.now().millisecondsSinceEpoch}.png';
     String imagePath = '${directory.path}/419419923/$imageName';
     return await f.compute(_screenshot, [
       RootIsolateToken.instance!,
       maxBytes,
-      imagePath
+      imagePath,
+      compress
     ]);
   }
 
@@ -25,10 +26,12 @@ class ScreenshotHelper {
     RootIsolateToken? rootToken;
     int maxSize = 400 * 1024;
     String? imagePath;
+    bool compress = true;
     if (data is List) {
       rootToken = data[0];
       maxSize = data[1];
       imagePath = data[2];
+      compress = data[3];
     }
     if (rootToken == null || imagePath == null || imagePath.isEmpty) {
       return null;
@@ -41,7 +44,11 @@ class ScreenshotHelper {
           imagePath: imagePath
       );
       if (screenShot != null && screenShot.isNotEmpty) {
-        memoryImage = await f.compute(_compress1, [screenShot, maxSize]);
+        if (compress) {
+          memoryImage = await f.compute(_compress1, [screenShot, maxSize]);
+        } else {
+          memoryImage = screenShot;
+        }
         // memoryImage = await _compress1([screenShot, resolution]);
       }
       return memoryImage;
