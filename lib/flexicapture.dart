@@ -27,7 +27,7 @@ class Flexicapture {
   /// Start the TIMER once [maxSize] [maxMinute] value added properly.
   void start() {
     if (kDebugMode) {
-      print("TIMER-SET:[$_isActiveRandomDuration][$_isStartTimer]");
+      print("FLEXICAPTURE: TIMER-SET:[$_isActiveRandomDuration][$_isStartTimer]");
     }
     if (_isStartTimer == false && _isActiveRandomDuration) {
       _isStartTimer = true;
@@ -37,8 +37,12 @@ class Flexicapture {
 
   void _startTimer() async {
     if (_isActiveRandomDuration) {
-      await Future.delayed(randomDuration!);
-      _setRandomValue((_randomDuration?.inMinutes ?? 0));
+      var duration = randomDuration;
+      if (kDebugMode) {
+        print("FLEXICAPTURE: RANDOM-DURATION[${duration.inMinutes}]");
+      }
+      await Future.delayed(duration);
+      _setRandomValue((duration.inMinutes));
       if (_pauseCapture == false) {
         // CAPTURING
         _setValue(await ScreenshotHelper.captureScreenShot(
@@ -52,13 +56,13 @@ class Flexicapture {
     var randomMin = _randomMin(value);
     _randomDuration = Duration(minutes: randomMin);
     if (kDebugMode) {
-      print("RANDOM-MIN-SET:[$randomMin][$_isActiveRandomDuration][$_isStartTimer]");
+      print("FLEXICAPTURE: RANDOM-MIN-SET[$randomMin][$_isActiveRandomDuration][$_isStartTimer]");
     }
   }
 
-  Duration? get randomDuration => _randomDuration;
+  Duration get randomDuration => Duration(minutes: _randomMin(_maxMinute));
 
-  bool get _isActiveRandomDuration => (_randomDuration != null && ((_randomDuration?.inMinutes ?? 0) > 0));
+  bool get _isActiveRandomDuration => (randomDuration.inMinutes > 0);
 
   int _randomMin(int value) {
     m.Random random = m.Random();
@@ -78,6 +82,9 @@ class Flexicapture {
 
   set enableCompress(bool value) {
     _enableCompress = value;
+    if (kDebugMode) {
+      print("FLEXICAPTURE: COMPRESS-ENABLE[$value]");
+    }
   }
 
   void _setValue(Uint8List? value) {
@@ -101,8 +108,17 @@ class Flexicapture {
 
 
   set pauseCapture(bool value) {
+    if (_pauseCapture == true) {
+      _startTimer();
+    }
     _pauseCapture = value;
+    if (kDebugMode) {
+      print("FLEXICAPTURE: PAUSE-CAPTURE[$value]");
+    }
   }
+
+
+  bool get pauseCapture => _pauseCapture;
 
   void dispose() {
     _screenShotController.close();

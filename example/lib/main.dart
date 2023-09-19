@@ -54,9 +54,26 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        floatingActionButton: FloatingActionButton.small(onPressed: (){
-          _flexicapturePlugin.maxMinute = maxMin + 1;
-        }, child: Icon(Icons.add)),
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              FloatingActionButton.small(onPressed: (){
+                _flexicapturePlugin.maxMinute = maxMin + 1;
+              }, child: Icon(Icons.add), elevation: 5,),
+              SizedBox(width: 10),
+              FloatingActionButton.small(onPressed: (){
+                _flexicapturePlugin.pauseCapture = !_flexicapturePlugin.pauseCapture;
+              }, child: Icon(_flexicapturePlugin.pauseCapture ? Icons.play_arrow : Icons.pause)),
+              SizedBox(width: 10),
+              FloatingActionButton.small(onPressed: (){
+                _flexicapturePlugin.enableCompress = !_flexicapturePlugin.enableCompress;
+              }, child: Icon(Icons.compress))
+            ],
+          ),
+        ),
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
