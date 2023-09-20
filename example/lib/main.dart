@@ -1,3 +1,4 @@
+import 'package:flexicapture/app_helper_screen_capture.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -73,7 +74,14 @@ class _MyAppState extends State<MyApp> {
               SizedBox(width: 10),
               FloatingActionButton.small(onPressed: (){
                 _flexicapturePlugin.enableCompress = !_flexicapturePlugin.enableCompress;
-              }, child: Icon(Icons.compress))
+              }, child: Icon(Icons.compress)),
+              SizedBox(width: 10),
+              FloatingActionButton.small(onPressed: () async{
+                var size = await ScreenshotHelper.captureScreenShot();
+                if (kDebugMode) {
+                  print("CAPTURED SIZE[${TimeOfDay.now()}] [${size?.lengthInBytes}]");
+                }
+              }, child: Icon(Icons.camera_alt_rounded)),
             ],
           ),
         ),

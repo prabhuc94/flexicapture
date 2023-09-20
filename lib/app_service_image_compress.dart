@@ -18,7 +18,8 @@ class ImageCompressor {
       inputUin8List = data[0];
       maxSizeInBytes = data[1];
     }
-    if (inputUin8List == null || inputUin8List.isNotEmpty || maxSizeInBytes == null || (maxSizeInBytes ?? 0) == 0) {
+
+    if (inputUin8List == null || inputUin8List.isEmpty || maxSizeInBytes == null || (maxSizeInBytes) == 0) {
       return null;
     }
     final inputImage = img.decodeImage(inputUin8List);

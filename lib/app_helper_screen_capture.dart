@@ -1,4 +1,3 @@
-import 'dart:developer' as d;
 import 'dart:io';
 import 'package:flexicapture/app_lib_rewamp.dart';
 import 'package:flexicapture/app_service_image_compress.dart';
@@ -33,6 +32,7 @@ class ScreenshotHelper {
       imagePath = data[2];
       compress = data[3];
     }
+
     if (rootToken == null || imagePath == null || imagePath.isEmpty) {
       return null;
     }
@@ -49,7 +49,6 @@ class ScreenshotHelper {
         } else {
           memoryImage = screenShot;
         }
-        // memoryImage = await _compress1([screenShot, resolution]);
       }
       return memoryImage;
     } catch (e) {
@@ -74,8 +73,7 @@ class ScreenshotHelper {
         }
       }
       return memoryImage;
-    } catch (e, stack) {
-      d.log("$e", stackTrace: stack);
+    } catch (e) {
       return null;
     }
   }
@@ -91,7 +89,6 @@ class ScreenshotHelper {
       return imageFile;
     }
     int inputByte = (imageFile.lengthInBytes ?? 0);
-    // return (inputByte > maxSize) ? await ImageCompressor().compressImagesInParallel(imageFile, maxSize) : imageFile;
     return (inputByte > maxSize) ? await f.compute(ImageCompressor.compress, [imageFile, maxSize]) : imageFile;
   }
 }
