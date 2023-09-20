@@ -25,6 +25,9 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     initPlatformState();
     _flexicapturePlugin.maxMinute = 5;
+    _flexicapturePlugin.enableCompress = true;
+    _flexicapturePlugin.pauseCapture = true;
+    _flexicapturePlugin.maxSize = 400 * 1024;
     _flexicapturePlugin.start();
   }
 
