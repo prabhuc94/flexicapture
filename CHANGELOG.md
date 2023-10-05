@@ -1,3 +1,16 @@
 ## 0.0.1
 
-* TODO: Describe initial release.
+- initial release.
+
+## 0.0.2
+
+- Library upgraded.
+
+## 0.0.3
+
+- Capturing modified
+- Example updated
+
+## 0.0.4
+
+- Random duration calculation modified

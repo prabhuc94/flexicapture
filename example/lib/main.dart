@@ -21,6 +21,10 @@ class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
   final _flexicapturePlugin = Flexicapture();
   int maxMin = 5;
+  List<Map<String, dynamic>> captured = [];
+  StreamController<List<Map<String, dynamic>>> capturedController =
+      StreamController.broadcast();
+
   @override
   void initState() {
     super.initState();
@@ -30,6 +34,11 @@ class _MyAppState extends State<MyApp> {
     _flexicapturePlugin.pauseCapture = true;
     _flexicapturePlugin.maxSize = 400 * 1024;
     _flexicapturePlugin.start();
+    _flexicapturePlugin.screenShotListen.listen((event) {
+      captured
+          .add({"imageBytes": event, "capturedAt": TimeOfDay.now().toString()});
+      capturedController.sink.add(captured);
+    });
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -38,8 +47,8 @@ class _MyAppState extends State<MyApp> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     // We also handle the message potentially returning null.
     try {
-      platformVersion =
-          await _flexicapturePlugin.getPlatformVersion() ?? 'Unknown platform version';
+      platformVersion = await _flexicapturePlugin.getPlatformVersion() ??
+          'Unknown platform version';
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
@@ -64,24 +73,39 @@ class _MyAppState extends State<MyApp> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              FloatingActionButton.small(onPressed: (){
-                _flexicapturePlugin.maxMinute = maxMin + 1;
-              }, child: Icon(Icons.add), elevation: 5,),
+              FloatingActionButton.small(
+                onPressed: () {
+                  _flexicapturePlugin.maxMinute = maxMin + 1;
+                },
+                child: Icon(Icons.add),
+                elevation: 5,
+              ),
               SizedBox(width: 10),
-              FloatingActionButton.small(onPressed: (){
-                _flexicapturePlugin.pauseCapture = !_flexicapturePlugin.pauseCapture;
-              }, child: Icon(_flexicapturePlugin.pauseCapture ? Icons.play_arrow : Icons.pause)),
+              FloatingActionButton.small(
+                  onPressed: () {
+                    _flexicapturePlugin.pauseCapture =
+                        !_flexicapturePlugin.pauseCapture;
+                  },
+                  child: Icon(_flexicapturePlugin.pauseCapture
+                      ? Icons.play_arrow
+                      : Icons.pause)),
               SizedBox(width: 10),
-              FloatingActionButton.small(onPressed: (){
-                _flexicapturePlugin.enableCompress = !_flexicapturePlugin.enableCompress;
-              }, child: Icon(Icons.compress)),
+              FloatingActionButton.small(
+                  onPressed: () {
+                    _flexicapturePlugin.enableCompress =
+                        !_flexicapturePlugin.enableCompress;
+                  },
+                  child: Icon(Icons.compress)),
               SizedBox(width: 10),
-              FloatingActionButton.small(onPressed: () async{
-                var size = await ScreenshotHelper.captureScreenShot();
-                if (kDebugMode) {
-                  print("CAPTURED SIZE[${TimeOfDay.now()}] [${size?.lengthInBytes}]");
-                }
-              }, child: Icon(Icons.camera_alt_rounded)),
+              FloatingActionButton.small(
+                  onPressed: () async {
+                    var size = await ScreenshotHelper.captureScreenShot();
+                    if (kDebugMode) {
+                      print(
+                          "CAPTURED SIZE[${TimeOfDay.now()}] [${size?.lengthInBytes}]");
+                    }
+                  },
+                  child: Icon(Icons.camera_alt_rounded)),
             ],
           ),
         ),
@@ -89,15 +113,31 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: Flex(direction: Axis.vertical,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('Running on: $_platformVersion\n'),
-            StreamBuilder(stream: _flexicapturePlugin.randomMinController, builder: (context, snapshot) => Text('TICK: ${snapshot.data} @${TimeOfDay.now().toString()}'),),
-            StreamBuilder(stream: _flexicapturePlugin.screenShotListen, builder: (context, snapshot) => (snapshot.data?.isNotEmpty ?? false) ? Text('CAPTURED: ${(snapshot.data?.lengthInBytes ?? 0) / 1000} kb @${TimeOfDay.now().toString()}') : Text(""),),
+            child: Flex(
+                direction: Axis.vertical,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+              Text('Running on: $_platformVersion\n'),
+              StreamBuilder(
+                stream: _flexicapturePlugin.randomMinController,
+                builder: (context, snapshot) => Text(
+                    'TICK: ${snapshot.data} @${TimeOfDay.now().toString()}'),
+              ),
+              StreamBuilder(
+                stream: capturedController.stream,
+                builder: (context, snapshot) => (snapshot.data?.isNotEmpty ??
+                        false)
+                    ? ListView(
+                  shrinkWrap: true,
+                  children: snapshot.data?.map((e) => Text(
+                    textAlign: TextAlign.center,
+                      'CAPTURED: ${(e["imageBytes"].lengthInBytes ?? 0) / 1000} kb @${e['capturedAt']}')).toList() ?? [],
+                )
+                    : Text("Not yet captured"),
+              ),
             ])),
-        ),
-      );
+      ),
+    );
   }
 }

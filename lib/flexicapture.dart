@@ -1,7 +1,5 @@
-
 import 'dart:async';
 import 'dart:math' as m;
-import 'dart:typed_data';
 import 'package:flexicapture/app_helper_screen_capture.dart';
 import 'package:flutter/foundation.dart';
 
@@ -23,6 +21,8 @@ class Flexicapture {
   bool _isStartTimer = false;
   bool _enableCompress = true;
   bool _pauseCapture = false;
+  double fixedRatio = 0.6;
+  double randomRatio = 0.4;
 
   /// Start the TIMER once [maxSize] [maxMinute] value added properly.
   void start() {
@@ -43,10 +43,15 @@ class Flexicapture {
       }
       await Future.delayed(duration);
       _setRandomValue((duration.inMinutes));
-      if (_pauseCapture == false) {
+      if (pauseCapture == false) {
         // CAPTURING
         _setValue(await ScreenshotHelper.captureScreenShot(
             maxBytes: maxSize, compress: enableCompress));
+      } else {
+        if (kDebugMode) {
+          print("FLEXICAPTURE: PAUSE-CAPTURE[$pauseCapture]");
+        }
+        _setValue(null);
       }
     }
   }
@@ -60,13 +65,18 @@ class Flexicapture {
     }
   }
 
-  Duration get randomDuration => Duration(minutes: _randomMin(_maxMinute));
+  Duration get randomDuration => Duration(minutes: _captureMin);
 
   bool get _isActiveRandomDuration => (randomDuration.inMinutes > 0);
 
+  int get _captureMin => _fixedMin(_maxMinute) + _randomMin(_maxMinute);
+
+  int _fixedMin(int value) => (value * fixedRatio).round();
+
   int _randomMin(int value) {
+    var minute = (value * randomRatio).round();
     m.Random random = m.Random();
-    var count = random.nextInt(value) + 1;
+    var count = random.nextInt(minute);
     return count;
   }
 
@@ -99,25 +109,11 @@ class Flexicapture {
 
 
   // SET VALUE MULTIPLIED BY [1024] LIKE 400 KB REQUIRED THEN [400 * 1024]
-  set maxSize(int value) {
-    _maxSize = value;
-  }
-
-
+  set maxSize(int value) => _maxSize = value;
   int get maxSize => _maxSize;
 
 
-  set pauseCapture(bool value) {
-    if (_pauseCapture == true) {
-      _startTimer();
-    }
-    _pauseCapture = value;
-    if (kDebugMode) {
-      print("FLEXICAPTURE: PAUSE-CAPTURE[$value]");
-    }
-  }
-
-
+  set pauseCapture(bool value) => _pauseCapture = value;
   bool get pauseCapture => _pauseCapture;
 
   void dispose() {
