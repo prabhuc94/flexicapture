@@ -14,3 +14,7 @@
 ## 0.0.4
 
 - Random duration calculation modified
+
+## 0.0.5
+
+- Default Random duration set

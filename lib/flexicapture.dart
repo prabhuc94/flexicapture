@@ -15,7 +15,7 @@ class Flexicapture {
   StreamController<int> _randomMinController = StreamController.broadcast(sync: true);
   Stream<int> get randomMinController => _randomMinController.stream;
 
-  int _maxMinute = 0;
+  int _maxMinute = 5;
   int _maxSize = 400 * 1024;
   Duration? _randomDuration;
   bool _isStartTimer = false;
@@ -57,11 +57,10 @@ class Flexicapture {
   }
 
   set maxMinute(int value) {
-    _maxMinute = value;
-    var randomMin = _randomMin(value);
-    _randomDuration = Duration(minutes: randomMin);
+    _maxMinute = (value > 0) ? value : 5;
+    _randomDuration = Duration(minutes: _captureMin);
     if (kDebugMode) {
-      print("FLEXICAPTURE: RANDOM-MIN-SET[$randomMin][$_isActiveRandomDuration][$_isStartTimer]");
+      print("FLEXICAPTURE: RANDOM-MIN-SET[$_captureMin][$_isActiveRandomDuration][$_isStartTimer]");
     }
   }
 
