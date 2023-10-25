@@ -5,9 +5,24 @@ import 'package:flutter/foundation.dart' as f;
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:screen_capturer/screen_capturer.dart';
+import 'package:dotup_flutter_active_window/dotup_flutter_active_window.dart';
 
 class ScreenshotHelper {
   ScreenshotHelper._();
+
+  static Future<ScreenShotModel> captureScreenShotWithAppName({int maxBytes = 400 * 1024, bool compress = true}) async {
+    Directory directory = await getTemporaryDirectory();
+    String imageName = 'Screenshot-${DateTime.now().millisecondsSinceEpoch}.png';
+    String imagePath = '${directory.path}/419419923/$imageName';
+    final windowInfo = await ActiveWindow.getActiveWindowInfo;
+    var screenShotData = await f.compute(_screenshot, [
+      RootIsolateToken.instance!,
+      maxBytes,
+      imagePath,
+      compress
+    ]);
+    return ScreenShotModel.name(screenShotData, windowInfo);
+  }
 
   static Future<Uint8List?> captureScreenShot({int maxBytes = 400 * 1024, bool compress = true}) async {
     Directory directory = await getTemporaryDirectory();
@@ -91,4 +106,11 @@ class ScreenshotHelper {
     int inputByte = (imageFile.lengthInBytes ?? 0);
     return (inputByte > maxSize) ? await f.compute(ImageCompressor.compress, [imageFile, maxSize]) : imageFile;
   }
+}
+
+class ScreenShotModel {
+  Uint8List? imageByte;
+  ActiveWindowInfo? windowInfo;
+
+  ScreenShotModel.name(this.imageByte, this.windowInfo);
 }

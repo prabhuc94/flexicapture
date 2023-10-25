@@ -29,16 +29,14 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     initPlatformState();
-    _flexicapturePlugin.maxMinute = 5;
+    _flexicapturePlugin.maxMinute = 2;
     _flexicapturePlugin.enableCompress = true;
-    _flexicapturePlugin.pauseCapture = true;
+    _flexicapturePlugin.pauseCapture = false;
     _flexicapturePlugin.maxSize = 400 * 1024;
     _flexicapturePlugin.start();
-    _flexicapturePlugin.screenShotListen.listen((event) {
-      captured
-          .add({"imageBytes": event, "capturedAt": TimeOfDay.now().toString()});
-      capturedController.sink.add(captured);
-    });
+    _flexicapturePlugin.exceptAppName = "flexitrac";
+    _flexicapturePlugin.onCaptured = (val) => print("IMAGE-SIZE:\t[${(val?.imageByte?.lengthInBytes ?? 0)}] WINDOW-DETAILS:\t[${val?.windowInfo?.toMap()}]");
+    _flexicapturePlugin.onCaptureError = (val) => print("Error:\t[$val]");
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -99,10 +97,10 @@ class _MyAppState extends State<MyApp> {
               SizedBox(width: 10),
               FloatingActionButton.small(
                   onPressed: () async {
-                    var size = await ScreenshotHelper.captureScreenShot();
+                    var data = await ScreenshotHelper.captureScreenShotWithAppName();
                     if (kDebugMode) {
                       print(
-                          "CAPTURED SIZE[${TimeOfDay.now()}] [${size?.lengthInBytes}]");
+                          "CAPTURED SIZE[${TimeOfDay.now()}] [${data.imageByte?.lengthInBytes}] [${data.windowInfo?.toMap()}]");
                     }
                   },
                   child: Icon(Icons.camera_alt_rounded)),
@@ -119,11 +117,6 @@ class _MyAppState extends State<MyApp> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
               Text('Running on: $_platformVersion\n'),
-              StreamBuilder(
-                stream: _flexicapturePlugin.randomMinController,
-                builder: (context, snapshot) => Text(
-                    'TICK: ${snapshot.data} @${TimeOfDay.now().toString()}'),
-              ),
               StreamBuilder(
                 stream: capturedController.stream,
                 builder: (context, snapshot) => (snapshot.data?.isNotEmpty ??

@@ -10,11 +10,6 @@ class Flexicapture {
     return FlexicapturePlatform.instance.getPlatformVersion();
   }
 
-  StreamController<Uint8List> _screenShotController = StreamController.broadcast(sync: true);
-  Stream<Uint8List> get screenShotListen => _screenShotController.stream;
-  StreamController<int> _randomMinController = StreamController.broadcast(sync: true);
-  Stream<int> get randomMinController => _randomMinController.stream;
-
   int _maxMinute = 5;
   int _maxSize = 400 * 1024;
   Duration? _randomDuration;
@@ -23,6 +18,13 @@ class Flexicapture {
   bool _pauseCapture = false;
   double fixedRatio = 0.6;
   double randomRatio = 0.4;
+  bool captureWithAppDetails = true;
+  String? exceptAppName;
+
+  Function(ScreenShotModel?)? _onCaptured;
+  Function(String)? _onCapturedError;
+  Function(Uint8List)? onScreenShot;
+  Function(int)? onRandomMinutes;
 
   /// Start the TIMER once [maxSize] [maxMinute] value added properly.
   void start() {
@@ -45,8 +47,13 @@ class Flexicapture {
       _setRandomValue((duration.inMinutes));
       if (pauseCapture == false) {
         // CAPTURING
-        _setValue(await ScreenshotHelper.captureScreenShot(
-            maxBytes: maxSize, compress: enableCompress));
+        if (captureWithAppDetails) {
+          _updateValueWithAppName(await ScreenshotHelper.captureScreenShotWithAppName(
+              maxBytes: maxSize, compress: enableCompress));
+        } else {
+          _setValue(await ScreenshotHelper.captureScreenShot(
+              maxBytes: maxSize, compress: enableCompress));
+        }
       } else {
         if (kDebugMode) {
           print("FLEXICAPTURE: PAUSE-CAPTURE[$pauseCapture]");
@@ -79,12 +86,7 @@ class Flexicapture {
     return count;
   }
 
-  void _setRandomValue(int value) {
-    if (_randomMinController.isClosed) {
-      _randomMinController = StreamController.broadcast(sync: true);
-    }
-    _randomMinController.sink.add(value);
-  }
+  void _setRandomValue(int value) => onRandomMinutes?.call(value);
 
 
   bool get enableCompress => _enableCompress;
@@ -97,11 +99,20 @@ class Flexicapture {
   }
 
   void _setValue(Uint8List? value) {
-    if (_screenShotController.isClosed) {
-      _screenShotController = StreamController.broadcast(sync: true);
-    }
     if (value != null && value.isNotEmpty) {
-      _screenShotController.sink.add(value);
+      onScreenShot?.call(value);
+    }
+    _startTimer();
+  }
+
+  void _updateValueWithAppName(ScreenShotModel value) {
+    if (value.imageByte?.isNotEmpty ?? false) {
+      // UPDATE WITH EVENT MODE
+      if (exceptAppName == null || (exceptAppName?.isEmpty ?? false) || !(value.windowInfo?.appName?.toLowerCase().startsWith("$exceptAppName".toLowerCase()) ?? false)) {
+        _onCaptured?.call(value);
+      } else {
+        _onCapturedError?.call("${"$exceptAppName"[0].toUpperCase()}${exceptAppName?.substring(1)} is focused");
+      }
     }
     _startTimer();
   }
@@ -111,13 +122,15 @@ class Flexicapture {
   set maxSize(int value) => _maxSize = value;
   int get maxSize => _maxSize;
 
-
   set pauseCapture(bool value) => _pauseCapture = value;
   bool get pauseCapture => _pauseCapture;
 
+
+  set onCaptured(Function(ScreenShotModel?) value) => _onCaptured = value;
+
+  set onCaptureError(Function(String) value) => _onCapturedError = value;
+
   void dispose() {
-    _screenShotController.close();
-    _randomMinController.close();
     _isStartTimer = false;
     _randomDuration = null;
   }

@@ -18,3 +18,7 @@
 ## 0.0.5
 
 - Default Random duration set
+
+## 0.0.6
+- Emit captured window details with screenshot
+- StreamController to Function modified
