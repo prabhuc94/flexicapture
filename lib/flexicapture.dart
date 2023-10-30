@@ -19,6 +19,7 @@ class Flexicapture {
   double fixedRatio = 0.6;
   double randomRatio = 0.4;
   bool captureWithAppDetails = true;
+  bool convertBase64 = true;
   String? exceptAppName;
 
   Function(ScreenShotModel?)? _onCaptured;
@@ -49,7 +50,7 @@ class Flexicapture {
         // CAPTURING
         if (captureWithAppDetails) {
           _updateValueWithAppName(await ScreenshotHelper.captureScreenShotWithAppName(
-              maxBytes: maxSize, compress: enableCompress));
+              maxBytes: maxSize, compress: enableCompress, isConvertBase64: convertBase64));
         } else {
           _setValue(await ScreenshotHelper.captureScreenShot(
               maxBytes: maxSize, compress: enableCompress));

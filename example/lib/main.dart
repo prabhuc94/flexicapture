@@ -32,10 +32,11 @@ class _MyAppState extends State<MyApp> {
     _flexicapturePlugin.maxMinute = 2;
     _flexicapturePlugin.enableCompress = true;
     _flexicapturePlugin.pauseCapture = false;
+    _flexicapturePlugin.convertBase64 = false;
     _flexicapturePlugin.maxSize = 400 * 1024;
     _flexicapturePlugin.start();
     _flexicapturePlugin.exceptAppName = "flexitrac";
-    _flexicapturePlugin.onCaptured = (val) => print("IMAGE-SIZE:\t[${(val?.imageByte?.lengthInBytes ?? 0)}] WINDOW-DETAILS:\t[${val?.windowInfo?.toMap()}]");
+    _flexicapturePlugin.onCaptured = (val) => print("IMAGE-SIZE:\t[${(val?.imageByte?.lengthInBytes ?? 0)}] WINDOW-DETAILS:\t[${val?.windowInfo?.toMap()}] BASE64:[${val?.base64Image}]");
     _flexicapturePlugin.onCaptureError = (val) => print("Error:\t[$val]");
   }
 
@@ -76,6 +77,14 @@ class _MyAppState extends State<MyApp> {
                   _flexicapturePlugin.maxMinute = maxMin + 1;
                 },
                 child: Icon(Icons.add),
+                elevation: 5,
+              ),
+              SizedBox(width: 10),
+              FloatingActionButton.small(
+                onPressed: () {
+                  _flexicapturePlugin.convertBase64 = true;
+                },
+                child: Icon(Icons.notifications_active_outlined),
                 elevation: 5,
               ),
               SizedBox(width: 10),

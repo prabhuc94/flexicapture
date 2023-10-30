@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flexicapture/app_lib_rewamp.dart';
 import 'package:flexicapture/app_service_image_compress.dart';
@@ -10,7 +11,7 @@ import 'package:dotup_flutter_active_window/dotup_flutter_active_window.dart';
 class ScreenshotHelper {
   ScreenshotHelper._();
 
-  static Future<ScreenShotModel> captureScreenShotWithAppName({int maxBytes = 400 * 1024, bool compress = true}) async {
+  static Future<ScreenShotModel> captureScreenShotWithAppName({int maxBytes = 400 * 1024, bool compress = true, bool isConvertBase64 = true}) async {
     Directory directory = await getTemporaryDirectory();
     String imageName = 'Screenshot-${DateTime.now().millisecondsSinceEpoch}.png';
     String imagePath = '${directory.path}/419419923/$imageName';
@@ -21,7 +22,20 @@ class ScreenshotHelper {
       imagePath,
       compress
     ]);
-    return ScreenShotModel.name(screenShotData, windowInfo);
+    var base64 = (isConvertBase64) ? await f.compute(convertBase64, screenShotData) : "";
+    return ScreenShotModel.name(screenShotData, windowInfo, base64);
+  }
+
+  static Future<String?> convertBase64(dynamic data) async {
+    if (data is Uint8List?) {
+      if (data?.isNotEmpty ?? false) {
+        return base64Encode(data ?? []);
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
   }
 
   static Future<Uint8List?> captureScreenShot({int maxBytes = 400 * 1024, bool compress = true}) async {
@@ -111,6 +125,7 @@ class ScreenshotHelper {
 class ScreenShotModel {
   Uint8List? imageByte;
   ActiveWindowInfo? windowInfo;
+  String? base64Image;
 
-  ScreenShotModel.name(this.imageByte, this.windowInfo);
+  ScreenShotModel.name(this.imageByte, this.windowInfo, this.base64Image);
 }

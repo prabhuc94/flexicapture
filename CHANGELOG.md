@@ -22,3 +22,6 @@
 ## 0.0.6
 - Emit captured window details with screenshot
 - StreamController to Function modified
+
+## 0.0.7
+- Convert base64 after captured
