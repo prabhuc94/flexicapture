@@ -25,3 +25,6 @@
 
 ## 0.0.7
 - Convert base64 after captured
+
+## 0.0.8
+- Moved from start to end: Capture active window details 

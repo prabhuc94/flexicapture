@@ -15,7 +15,6 @@ class ScreenshotHelper {
     Directory directory = await getTemporaryDirectory();
     String imageName = 'Screenshot-${DateTime.now().millisecondsSinceEpoch}.png';
     String imagePath = '${directory.path}/419419923/$imageName';
-    final windowInfo = await ActiveWindow.getActiveWindowInfo;
     var screenShotData = await f.compute(_screenshot, [
       RootIsolateToken.instance!,
       maxBytes,
@@ -23,6 +22,7 @@ class ScreenshotHelper {
       compress
     ]);
     var base64 = (isConvertBase64) ? await f.compute(convertBase64, screenShotData) : "";
+    final windowInfo = await ActiveWindow.getActiveWindowInfo;
     return ScreenShotModel.name(screenShotData, windowInfo, base64);
   }
 
@@ -117,7 +117,7 @@ class ScreenshotHelper {
     if (imageFile == null || imageFile.isEmpty) {
       return imageFile;
     }
-    int inputByte = (imageFile.lengthInBytes ?? 0);
+    int inputByte = (imageFile.lengthInBytes);
     return (inputByte > maxSize) ? await f.compute(ImageCompressor.compress, [imageFile, maxSize]) : imageFile;
   }
 }
