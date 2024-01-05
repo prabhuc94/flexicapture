@@ -11,18 +11,25 @@ import 'package:dotup_flutter_active_window/dotup_flutter_active_window.dart';
 class ScreenshotHelper {
   ScreenshotHelper._();
 
-  static Future<ScreenShotModel> captureScreenShotWithAppName({int maxBytes = 400 * 1024, bool compress = true, bool isConvertBase64 = true}) async {
+  static Future<ScreenShotModel> captureScreenShotWithAppName(
+      {int maxBytes = 400 * 1024,
+      bool compress = true,
+      bool isConvertBase64 = true}) async {
     Directory directory = await getTemporaryDirectory();
-    String imageName = 'Screenshot-${DateTime.now().millisecondsSinceEpoch}.png';
+    String imageName =
+        'Screenshot-${DateTime.now().millisecondsSinceEpoch}.png';
     String imagePath = '${directory.path}/419419923/$imageName';
-    var screenShotData = await f.compute(_screenshot, [
-      RootIsolateToken.instance!,
-      maxBytes,
-      imagePath,
-      compress
-    ]);
-    var base64 = (isConvertBase64) ? await f.compute(convertBase64, screenShotData) : "";
-    final windowInfo = await ActiveWindow.getActiveWindowInfo;
+    var screenShotData = await f.compute(_screenshot,
+        [RootIsolateToken.instance!, maxBytes, imagePath, compress]);
+    var base64 =
+        (isConvertBase64) ? await f.compute(convertBase64, screenShotData) : "";
+    var windowInfo = await ActiveWindow.getActiveWindowInfo;
+    if (windowInfo == null ||
+        windowInfo.appName == null ||
+        (windowInfo.appName?.isEmpty ?? false) ||
+        windowInfo.title.isEmpty) {
+      windowInfo = await ActiveWindow.getActiveWindowInfo;
+    }
     return ScreenShotModel.name(screenShotData, windowInfo, base64);
   }
 
@@ -38,16 +45,14 @@ class ScreenshotHelper {
     }
   }
 
-  static Future<Uint8List?> captureScreenShot({int maxBytes = 400 * 1024, bool compress = true}) async {
+  static Future<Uint8List?> captureScreenShot(
+      {int maxBytes = 400 * 1024, bool compress = true}) async {
     Directory directory = await getTemporaryDirectory();
-    String imageName = 'Screenshot-${DateTime.now().millisecondsSinceEpoch}.png';
+    String imageName =
+        'Screenshot-${DateTime.now().millisecondsSinceEpoch}.png';
     String imagePath = '${directory.path}/419419923/$imageName';
-    return await f.compute(_screenshot, [
-      RootIsolateToken.instance!,
-      maxBytes,
-      imagePath,
-      compress
-    ]);
+    return await f.compute(_screenshot,
+        [RootIsolateToken.instance!, maxBytes, imagePath, compress]);
   }
 
   static Future<Uint8List?> _screenshot(dynamic data) async {
@@ -69,9 +74,7 @@ class ScreenshotHelper {
     Uint8List? memoryImage;
     try {
       var screenShot = await screenCapture.capture(
-          mode: CaptureMode.screen,
-          imagePath: imagePath
-      );
+          mode: CaptureMode.screen, imagePath: imagePath);
       if (screenShot != null && screenShot.isNotEmpty) {
         if (compress) {
           memoryImage = await f.compute(_compress1, [screenShot, maxSize]);
@@ -90,12 +93,11 @@ class ScreenshotHelper {
     Uint8List? memoryImage;
     try {
       Directory directory = await getTemporaryDirectory();
-      String imageName = 'Screenshot-${DateTime.now().millisecondsSinceEpoch}.png';
+      String imageName =
+          'Screenshot-${DateTime.now().millisecondsSinceEpoch}.png';
       String imagePath = '${directory.path}/flexitrac/Screenshots/$imageName';
-      var screenShot = await ScreenCapture.instance.capture(
-        mode: mode,
-        imagePath: imagePath
-      );
+      var screenShot = await ScreenCapture.instance
+          .capture(mode: mode, imagePath: imagePath);
       if (screenShot != null && screenShot.isNotEmpty) {
         if (screenShot.isNotEmpty) {
           memoryImage = await f.compute(_compress1, [screenShot, maxSize]);
@@ -118,7 +120,9 @@ class ScreenshotHelper {
       return imageFile;
     }
     int inputByte = (imageFile.lengthInBytes);
-    return (inputByte > maxSize) ? await f.compute(ImageCompressor.compress, [imageFile, maxSize]) : imageFile;
+    return (inputByte > maxSize)
+        ? await f.compute(ImageCompressor.compress, [imageFile, maxSize])
+        : imageFile;
   }
 }
 

@@ -28,3 +28,6 @@
 
 ## 0.0.8
 - Moved from start to end: Capture active window details 
+
+## 0.0.9
+- Recalling function added for getting active app details
