@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:active_window/active_window.dart';
+import 'package:active_window/active_window_info.dart';
 import 'package:flexicapture/app_lib_rewamp.dart';
 import 'package:flexicapture/app_service_image_compress.dart';
 import 'package:flutter/foundation.dart' as f;
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:screen_capturer/screen_capturer.dart';
-import 'package:dotup_flutter_active_window/dotup_flutter_active_window.dart';
 
 class ScreenshotHelper {
   ScreenshotHelper._();
@@ -18,17 +19,16 @@ class ScreenshotHelper {
     Directory directory = await getTemporaryDirectory();
     String imageName =
         'Screenshot-${DateTime.now().millisecondsSinceEpoch}.png';
-    String imagePath = '${directory.path}/419419923/$imageName';
+    String imagePath = '${directory.path}/capture/$imageName';
     var screenShotData = await f.compute(_screenshot,
         [RootIsolateToken.instance!, maxBytes, imagePath, compress]);
     var base64 =
         (isConvertBase64) ? await f.compute(convertBase64, screenShotData) : "";
-    var windowInfo = await ActiveWindow.getActiveWindowInfo;
+    var windowInfo = await ActiveWindow().getActiveWindow();
     if (windowInfo == null ||
         windowInfo.appName == null ||
-        (windowInfo.appName?.isEmpty ?? false) ||
-        windowInfo.title.isEmpty) {
-      windowInfo = await ActiveWindow.getActiveWindowInfo;
+        (windowInfo.appName?.isEmpty ?? false)) {
+      windowInfo = await ActiveWindow().getActiveWindow();
     }
     return ScreenShotModel.name(screenShotData, windowInfo, base64);
   }
@@ -50,7 +50,7 @@ class ScreenshotHelper {
     Directory directory = await getTemporaryDirectory();
     String imageName =
         'Screenshot-${DateTime.now().millisecondsSinceEpoch}.png';
-    String imagePath = '${directory.path}/419419923/$imageName';
+    String imagePath = '${directory.path}/capture/$imageName';
     return await f.compute(_screenshot,
         [RootIsolateToken.instance!, maxBytes, imagePath, compress]);
   }

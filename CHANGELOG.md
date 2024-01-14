@@ -31,3 +31,6 @@
 
 ## 0.0.9
 - Recalling function added for getting active app details
+
+## 0.1.0
+- Integrated new library to detect active app details even if app run from Admin mode
