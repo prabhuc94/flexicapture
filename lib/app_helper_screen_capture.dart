@@ -17,7 +17,7 @@ class ScreenshotHelper {
       bool compress = true,
       bool isConvertBase64 = true}) async {
     var windowInfo = await ActiveWindow().getActiveWindow();
-    if (windowInfo == null || windowInfo.appName == null || (windowInfo.appName?.isEmpty ?? false)) {
+    if (windowInfo == null || (windowInfo.appName == null || (windowInfo.appName?.isEmpty ?? false)) || (windowInfo.title.isEmpty)) {
       await Future.delayed(const Duration(seconds: 10));
       windowInfo = await ActiveWindow().getActiveWindow();
     }

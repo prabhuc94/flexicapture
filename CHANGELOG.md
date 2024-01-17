@@ -37,3 +37,6 @@
 
 ## 0.1.1
 - Added [10] sec delay if active window is null while capture
+
+## 0.1.2
+- Library upgraded modified fetching active window name
