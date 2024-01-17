@@ -34,3 +34,6 @@
 
 ## 0.1.0
 - Integrated new library to detect active app details even if app run from Admin mode
+
+## 0.1.1
+- Added [10] sec delay if active window is null while capture

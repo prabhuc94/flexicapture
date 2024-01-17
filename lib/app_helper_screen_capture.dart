@@ -16,6 +16,11 @@ class ScreenshotHelper {
       {int maxBytes = 400 * 1024,
       bool compress = true,
       bool isConvertBase64 = true}) async {
+    var windowInfo = await ActiveWindow().getActiveWindow();
+    if (windowInfo == null || windowInfo.appName == null || (windowInfo.appName?.isEmpty ?? false)) {
+      await Future.delayed(const Duration(seconds: 10));
+      windowInfo = await ActiveWindow().getActiveWindow();
+    }
     Directory directory = await getTemporaryDirectory();
     String imageName =
         'Screenshot-${DateTime.now().millisecondsSinceEpoch}.png';
@@ -24,12 +29,6 @@ class ScreenshotHelper {
         [RootIsolateToken.instance!, maxBytes, imagePath, compress]);
     var base64 =
         (isConvertBase64) ? await f.compute(convertBase64, screenShotData) : "";
-    var windowInfo = await ActiveWindow().getActiveWindow();
-    if (windowInfo == null ||
-        windowInfo.appName == null ||
-        (windowInfo.appName?.isEmpty ?? false)) {
-      windowInfo = await ActiveWindow().getActiveWindow();
-    }
     return ScreenShotModel.name(screenShotData, windowInfo, base64);
   }
 
