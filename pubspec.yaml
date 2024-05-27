@@ -1,6 +1,6 @@
 name: flexicapture
 description: A Screen captuing library
-version: 0.1.2
+version: 0.1.3
 homepage: https://github.com/prabhuc94/flexicapture
 
 environment:
@@ -10,10 +10,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  image: ^4.0.17
+  image: ^4.2.0
   path_provider: ^2.1.1
   plugin_platform_interface: ^2.0.2
-  screen_capturer: ^0.1.7
+  screen_capturer: ^0.2.1
   active_window: ^0.0.3
 
 dev_dependencies:

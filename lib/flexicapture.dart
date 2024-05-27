@@ -21,6 +21,7 @@ class Flexicapture {
   bool captureWithAppDetails = true;
   bool convertBase64 = true;
   String? exceptAppName;
+  bool useMicroTask = false;
 
   Function(ScreenShotModel?)? _onCaptured;
   Function(String)? _onCapturedError;
@@ -28,7 +29,8 @@ class Flexicapture {
   Function(int)? onRandomMinutes;
 
   /// Start the TIMER once [maxSize] [maxMinute] value added properly.
-  void start() {
+  void start({bool microTask = false}) {
+    useMicroTask = microTask;
     if (kDebugMode) {
       print("FLEXICAPTURE: TIMER-SET:[$_isActiveRandomDuration][$_isStartTimer]");
     }
@@ -49,8 +51,15 @@ class Flexicapture {
       if (pauseCapture == false) {
         // CAPTURING
         if (captureWithAppDetails) {
-          _updateValueWithAppName(await ScreenshotHelper.captureScreenShotWithAppName(
-              maxBytes: maxSize, compress: enableCompress, isConvertBase64: convertBase64));
+          if (useMicroTask) {
+            _captureAndUpdate();
+          } else {
+            _updateValueWithAppName(
+                await ScreenshotHelper.captureScreenShotWithAppName(
+                    maxBytes: maxSize,
+                    compress: enableCompress,
+                    isConvertBase64: convertBase64));
+          }
         } else {
           _setValue(await ScreenshotHelper.captureScreenShot(
               maxBytes: maxSize, compress: enableCompress));
@@ -104,6 +113,12 @@ class Flexicapture {
       onScreenShot?.call(value);
     }
     _startTimer();
+  }
+
+  void _captureAndUpdate() async {
+    var val = await Future.microtask(() => ScreenshotHelper.captureScreenShotWithAppName(
+        maxBytes: maxSize, compress: enableCompress, isConvertBase64: convertBase64));
+    _updateValueWithAppName(val);
   }
 
   void _updateValueWithAppName(ScreenShotModel value) {

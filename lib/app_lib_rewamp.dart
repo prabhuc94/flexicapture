@@ -1,37 +1,21 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:screen_capturer/src/capture_mode.dart';
-import 'package:screen_capturer/src/captured_data.dart';
-import 'package:screen_capturer/src/screen_capturer_platform_interface.dart';
-import 'package:screen_capturer/src/system_screen_capturer.dart';
-import 'package:screen_capturer/src/system_screen_capturer_impl_linux.dart';
-import 'package:screen_capturer/src/system_screen_capturer_impl_macos.dart';
-import 'package:screen_capturer/src/system_screen_capturer_impl_windows.dart'
-if (dart.library.html) 'system_screen_capturer_impl_windows_noop.dart';
+import 'package:screen_capturer/screen_capturer.dart';
 
 class ScreenCapture {
-  ScreenCapture._() {
-    if (!kIsWeb && Platform.isLinux) {
-      _systemScreenCapturer = SystemScreenCapturerImplLinux();
-    } else if (!kIsWeb && Platform.isMacOS) {
-      _systemScreenCapturer = SystemScreenCapturerImplMacOS();
-    } else if (!kIsWeb && Platform.isWindows) {
-      _systemScreenCapturer = SystemScreenCapturerImplWindows();
-    }
-  }
+  ScreenCapture._();
 
   /// The shared instance of [ScreenCapture].
   static final ScreenCapture instance = ScreenCapture._();
 
-  late SystemScreenCapturer _systemScreenCapturer;
+  ScreenCapturerPlatform get _platform => ScreenCapturerPlatform.instance;
 
   /// Checks whether the current process already has screen capture access
   ///
   /// macOS only
-  Future<bool> isAccessAllowed() {
-    return ScreenCapturerPlatform.instance.isAccessAllowed();
+  Future<bool> isAccessAllowed() async {
+    return await _platform.isAccessAllowed();
   }
 
   /// Requests screen capture access
@@ -70,7 +54,7 @@ class ScreenCapture {
       // 如果是复制到剪切板，先清空剪切板，避免结果不正确
       Clipboard.setData(const ClipboardData(text: ''));
     }
-    await _systemScreenCapturer.capture(
+    await _platform.systemScreenCapturer.capture(
       mode: mode,
       imagePath: imagePath,
       copyToClipboard: copyToClipboard,

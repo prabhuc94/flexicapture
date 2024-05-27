@@ -40,3 +40,6 @@
 
 ## 0.1.2
 - Library upgraded modified fetching active window name
+
+## 0.1.3
+- Libraries upgraded
