@@ -32,7 +32,7 @@ Change the file `macos/Runner/DebugProfile.entitlements` or `macos/Runner/Releas
 To use the `Flexicapture` follow the necessary steps
 
 ```dart
-final _flexicapturePlugin = Flexicapture();
+final _flexiCapturePlugin = FlexiCapture();
 _flexicapturePlugin.maxMinute = 5;
 _flexicapturePlugin.start();
 ```

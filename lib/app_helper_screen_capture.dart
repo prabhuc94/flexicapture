@@ -1,13 +1,11 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:active_window/active_window.dart';
 import 'package:active_window/active_window_info.dart';
-import 'package:flexicapture/app_lib_rewamp.dart';
+import 'package:desktop_screenshot/desktop_screenshot.dart';
 import 'package:flexicapture/app_service_image_compress.dart';
 import 'package:flutter/foundation.dart' as f;
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:screen_capturer/screen_capturer.dart';
 
 class ScreenshotHelper {
   ScreenshotHelper._();
@@ -16,17 +14,15 @@ class ScreenshotHelper {
       {int maxBytes = 400 * 1024,
       bool compress = true,
       bool isConvertBase64 = true}) async {
-    var windowInfo = await ActiveWindow().getActiveWindow();
+    var activeWindow = ActiveWindow();
+    var windowInfo = await Future.microtask(activeWindow.getActiveWindow);
     if (windowInfo == null || (windowInfo.appName == null || (windowInfo.appName?.isEmpty ?? false)) || (windowInfo.title.isEmpty)) {
-      await Future.delayed(const Duration(seconds: 10));
-      windowInfo = await ActiveWindow().getActiveWindow();
+      await Future.delayed(Durations.extralong4);
+      windowInfo = await Future.microtask(activeWindow.getActiveWindow);
     }
-    Directory directory = await getTemporaryDirectory();
-    String imageName =
-        'Screenshot-${DateTime.now().millisecondsSinceEpoch}.png';
-    String imagePath = '${directory.path}/capture/$imageName';
-    var screenShotData = await f.compute(_screenshot,
-        [RootIsolateToken.instance!, maxBytes, imagePath, compress]);
+    var screenshot = await DesktopScreenshot().getScreenshot();
+    var screenShotData = await f.compute(_compress1,
+        [screenshot, maxBytes]);
     var base64 =
         (isConvertBase64) ? await f.compute(convertBase64, screenShotData) : "";
     return ScreenShotModel.name(screenShotData, windowInfo, base64);
@@ -46,34 +42,28 @@ class ScreenshotHelper {
 
   static Future<Uint8List?> captureScreenShot(
       {int maxBytes = 400 * 1024, bool compress = true}) async {
-    Directory directory = await getTemporaryDirectory();
-    String imageName =
-        'Screenshot-${DateTime.now().millisecondsSinceEpoch}.png';
-    String imagePath = '${directory.path}/capture/$imageName';
-    return await f.compute(_screenshot,
-        [RootIsolateToken.instance!, maxBytes, imagePath, compress]);
+    var screenshot = await DesktopScreenshot().getScreenshot();
+    return await f.compute(_compress1,
+        [screenshot, maxBytes]);
   }
 
   static Future<Uint8List?> _screenshot(dynamic data) async {
     RootIsolateToken? rootToken;
     int maxSize = 400 * 1024;
-    String? imagePath;
     bool compress = true;
     if (data is List) {
       rootToken = data[0];
       maxSize = data[1];
-      imagePath = data[2];
-      compress = data[3];
+      compress = data[2];
     }
 
-    if (rootToken == null || imagePath == null || imagePath.isEmpty) {
+    if (rootToken == null) {
       return null;
     }
     BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
     Uint8List? memoryImage;
     try {
-      var screenShot = await screenCapture.capture(
-          mode: CaptureMode.screen, imagePath: imagePath);
+      var screenShot = await DesktopScreenshot().getScreenshot();
       if (screenShot != null && screenShot.isNotEmpty) {
         if (compress) {
           memoryImage = await f.compute(_compress1, [screenShot, maxSize]);
@@ -88,19 +78,12 @@ class ScreenshotHelper {
   }
 
   static Future<Uint8List?> capture(
-      {CaptureMode mode = CaptureMode.screen, int maxSize = 400 * 1024}) async {
+      {int maxSize = 400 * 1024}) async {
     Uint8List? memoryImage;
     try {
-      Directory directory = await getTemporaryDirectory();
-      String imageName =
-          'Screenshot-${DateTime.now().millisecondsSinceEpoch}.png';
-      String imagePath = '${directory.path}/flexitrac/Screenshots/$imageName';
-      var screenShot = await ScreenCapture.instance
-          .capture(mode: mode, imagePath: imagePath);
+      var screenShot = await DesktopScreenshot().getScreenshot();
       if (screenShot != null && screenShot.isNotEmpty) {
-        if (screenShot.isNotEmpty) {
-          memoryImage = await f.compute(_compress1, [screenShot, maxSize]);
-        }
+        memoryImage = await f.compute(_compress1, [screenShot, maxSize]);
       }
       return memoryImage;
     } catch (e) {

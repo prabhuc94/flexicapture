@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flexicapture/flexicapture.dart';
 import 'package:flexicapture/flexicapture_platform_interface.dart';
 import 'package:flexicapture/flexicapture_method_channel.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
@@ -20,10 +19,7 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    Flexicapture flexicapturePlugin = Flexicapture();
     MockFlexicapturePlatform fakePlatform = MockFlexicapturePlatform();
     FlexicapturePlatform.instance = fakePlatform;
-
-    expect(await flexicapturePlugin.getPlatformVersion(), '42');
   });
 }

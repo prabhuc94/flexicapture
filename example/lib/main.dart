@@ -1,14 +1,11 @@
 import 'package:flexicapture/app_helper_screen_capture.dart';
+import 'package:flexicapture/flexicapture.dart';
+import 'package:flexicapture_example/capturing_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-import 'package:flutter/services.dart';
-import 'package:flexicapture/flexicapture.dart';
-
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(const MyApp());
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -18,54 +15,33 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
-  final _flexicapturePlugin = Flexicapture();
-  int maxMin = 5;
-  List<Map<String, dynamic>> captured = [];
+  // final _flexiCapturePlugin = FlexiCapture();
+  // int maxMin = 5;
   StreamController<List<Map<String, dynamic>>> capturedController =
       StreamController.broadcast();
+
+  late CapturingProvider provider;
 
   @override
   void initState() {
     super.initState();
-    initPlatformState();
-    _flexicapturePlugin.maxMinute = 2;
-    _flexicapturePlugin.enableCompress = true;
-    _flexicapturePlugin.pauseCapture = false;
-    _flexicapturePlugin.convertBase64 = false;
-    _flexicapturePlugin.maxSize = 400 * 1024;
-    _flexicapturePlugin.start();
-    _flexicapturePlugin.exceptAppName = "flexitrac";
-    _flexicapturePlugin.onCaptured = (val) => print("IMAGE-SIZE:\t[${(val?.imageByte?.lengthInBytes ?? 0)}] WINDOW-DETAILS:\t[${val?.windowInfo?.toMap()}] BASE64:[${val?.base64Image}]");
-    _flexicapturePlugin.onCaptureError = (val) => print("Error:\t[$val]");
-  }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    try {
-      platformVersion = await _flexicapturePlugin.getPlatformVersion() ??
-          'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
+    provider = CapturingProvider();
+    // _flexiCapturePlugin.maxMinute = 2;
+    // _flexiCapturePlugin.enableCompress = true;
+    // _flexiCapturePlugin.pauseCapture = false;
+    // _flexiCapturePlugin.convertBase64 = false;
+    // _flexiCapturePlugin.maxSize = 400 * 1024;
+    // _flexiCapturePlugin.start();
+    // _flexiCapturePlugin.exceptAppName = "flexitrac";
+    // _flexiCapturePlugin.onCaptured = (val) => print("IMAGE-SIZE:\t[${(val?.imageByte?.lengthInBytes ?? 0)}] WINDOW-DETAILS:\t[${val?.windowInfo?.toMap()}] BASE64:[${val?.base64Image}]");
+    // _flexiCapturePlugin.onCaptureError = (val) => print("Error:\t[$val]");
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
+      home: ListenableBuilder(listenable: provider, builder: (context, child) => Scaffold(
         bottomNavigationBar: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -73,46 +49,40 @@ class _MyAppState extends State<MyApp> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               FloatingActionButton.small(
-                onPressed: () {
-                  _flexicapturePlugin.maxMinute = maxMin + 1;
-                },
-                child: Icon(Icons.add),
+                tooltip: "Increase duration",
+                onPressed: provider.onIncrease,
                 elevation: 5,
+                child: const Icon(Icons.add),
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               FloatingActionButton.small(
-                onPressed: () {
-                  _flexicapturePlugin.convertBase64 = true;
-                },
-                child: Icon(Icons.notifications_active_outlined),
+                tooltip: "Convert Base64",
+                onPressed: provider.onConvert,
                 elevation: 5,
+                child: const Icon(Icons.conveyor_belt),
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               FloatingActionButton.small(
-                  onPressed: () {
-                    _flexicapturePlugin.pauseCapture =
-                        !_flexicapturePlugin.pauseCapture;
-                  },
-                  child: Icon(_flexicapturePlugin.pauseCapture
+                  tooltip: "Pause",
+                  onPressed: provider.onPause,
+                  child: Icon(provider.pauseCapture
                       ? Icons.play_arrow
                       : Icons.pause)),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               FloatingActionButton.small(
-                  onPressed: () {
-                    _flexicapturePlugin.enableCompress =
-                        !_flexicapturePlugin.enableCompress;
-                  },
-                  child: Icon(Icons.compress)),
-              SizedBox(width: 10),
+                  tooltip: "Compress",
+                  onPressed: provider.onCompress,
+                  child: const Icon(Icons.photo_size_select_small_rounded)),
+              const SizedBox(width: 10),
               FloatingActionButton.small(
-                  onPressed: () async {
-                    var data = await ScreenshotHelper.captureScreenShotWithAppName();
-                    if (kDebugMode) {
-                      print(
-                          "CAPTURED SIZE[${TimeOfDay.now()}] [${data.imageByte?.lengthInBytes}] [${data.windowInfo?.toMap()}]");
-                    }
-                  },
-                  child: Icon(Icons.camera_alt_rounded)),
+                  tooltip: "Screenshot",
+                  onPressed: provider.onCapture,
+                  child: const Icon(Icons.screenshot_monitor_rounded)),
+              const SizedBox(width: 10),
+              FloatingActionButton.small(
+                  tooltip: "Dispose ${provider.captureDisposed}",
+                  onPressed: (provider.captureDisposed) ? provider.onRestart : provider.onDispose,
+                  child: Icon((provider.captureDisposed) ? Icons.not_started_outlined : Icons.stop_screen_share_outlined)),
             ],
           ),
         ),
@@ -125,21 +95,13 @@ class _MyAppState extends State<MyApp> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-              Text('Running on: $_platformVersion\n'),
-              StreamBuilder(
-                stream: capturedController.stream,
-                builder: (context, snapshot) => (snapshot.data?.isNotEmpty ??
-                        false)
-                    ? ListView(
-                  shrinkWrap: true,
-                  children: snapshot.data?.map((e) => Text(
-                    textAlign: TextAlign.center,
-                      'CAPTURED: ${(e["imageBytes"].lengthInBytes ?? 0) / 1000} kb @${e['capturedAt']}')).toList() ?? [],
-                )
-                    : Text("Not yet captured"),
-              ),
-            ])),
-      ),
+                  (provider.capturedModel != null)
+                      ? Text(
+                      textAlign: TextAlign.center,
+                      'CAPTURED: ${(provider.capturedModel?.imageByte?.lengthInBytes ?? 0) / 1000} kb @${provider.capturedModel?.windowInfo?.toJson()}')
+                      : const Text("Not yet captured"),
+                ])),
+      ),),
     );
   }
 }

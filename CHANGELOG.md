@@ -43,3 +43,6 @@
 
 ## 0.1.3
 - Libraries upgraded
+
+## 0.1.4
+- ScreenCapturing library changed and able to capture without Utilizing memory
