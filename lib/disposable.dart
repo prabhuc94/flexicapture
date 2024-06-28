@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-abstract class Disposable {
+class Disposable {
 
   bool isDisposed = false;
   bool isInitialized = false;
