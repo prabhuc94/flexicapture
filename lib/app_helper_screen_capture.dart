@@ -1,7 +1,8 @@
 import 'dart:convert';
-import 'package:active_window/active_window.dart';
 import 'package:active_window/active_window_info.dart';
+import 'package:active_window/active_window_platform_interface.dart';
 import 'package:desktop_screenshot/desktop_screenshot.dart';
+import 'package:desktop_screenshot/desktop_screenshot_platform_interface.dart';
 import 'package:flexicapture/app_service_image_compress.dart';
 import 'package:flutter/foundation.dart' as f;
 import 'package:flutter/material.dart';
@@ -14,13 +15,12 @@ class ScreenshotHelper {
       {int maxBytes = 400 * 1024,
       bool compress = true,
       bool isConvertBase64 = true}) async {
-    var activeWindow = ActiveWindow();
-    var windowInfo = await Future.microtask(activeWindow.getActiveWindow);
+    var windowInfo = await Future.microtask(ActiveWindowPlatform.instance.getActiveWindow);
     if (windowInfo == null || (windowInfo.appName == null || (windowInfo.appName?.isEmpty ?? false)) || (windowInfo.title.isEmpty)) {
-      await Future.delayed(Durations.extralong4);
-      windowInfo = await Future.microtask(activeWindow.getActiveWindow);
+      await Future.delayed(Durations.medium3);
+      windowInfo = await Future.microtask(ActiveWindowPlatform.instance.getActiveWindow);
     }
-    var screenshot = await DesktopScreenshot().getScreenshot();
+    var screenshot = await Future.microtask(DesktopScreenshotPlatform.instance.getScreenshot);
     var screenShotData = await f.compute(_compress1,
         [screenshot, maxBytes]);
     var base64 =
@@ -45,36 +45,6 @@ class ScreenshotHelper {
     var screenshot = await DesktopScreenshot().getScreenshot();
     return await f.compute(_compress1,
         [screenshot, maxBytes]);
-  }
-
-  static Future<Uint8List?> _screenshot(dynamic data) async {
-    RootIsolateToken? rootToken;
-    int maxSize = 400 * 1024;
-    bool compress = true;
-    if (data is List) {
-      rootToken = data[0];
-      maxSize = data[1];
-      compress = data[2];
-    }
-
-    if (rootToken == null) {
-      return null;
-    }
-    BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
-    Uint8List? memoryImage;
-    try {
-      var screenShot = await DesktopScreenshot().getScreenshot();
-      if (screenShot != null && screenShot.isNotEmpty) {
-        if (compress) {
-          memoryImage = await f.compute(_compress1, [screenShot, maxSize]);
-        } else {
-          memoryImage = screenShot;
-        }
-      }
-      return memoryImage;
-    } catch (e) {
-      return null;
-    }
   }
 
   static Future<Uint8List?> capture(

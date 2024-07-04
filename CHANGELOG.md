@@ -46,3 +46,6 @@
 
 ## 0.1.4
 - ScreenCapturing library changed and able to capture without Utilizing memory
+
+## 0.1.5
+- Microtask implemented
