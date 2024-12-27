@@ -1,6 +1,6 @@
 name: flexicapture
 description: A Screen captuing library
-version: 0.1.6
+version: 0.1.7
 homepage: https://github.com/prabhuc94/flexicapture
 
 environment:
@@ -13,7 +13,7 @@ dependencies:
   image: ^4.2.0
   path_provider: ^2.1.1
   plugin_platform_interface: ^2.0.2
-  desktop_screenshot: ^0.0.3
+  desktop_screenshot: ^0.0.4
   active_window: ^0.0.3
   logger: ^2.3.0
 

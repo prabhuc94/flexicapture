@@ -52,3 +52,6 @@
 
 ## 0.1.6
 - Screenshot version upgraded
+
+## 0.1.7
+- Library version upgraded for Screenshot [MacOs]
